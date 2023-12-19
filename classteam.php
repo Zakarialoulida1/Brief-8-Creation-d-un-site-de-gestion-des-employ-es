@@ -60,9 +60,9 @@ class team
             $stm->bindParam(':id', $monequipe, PDO::PARAM_INT);
             $stm->execute();
 
-            $result = $stm->fetch(PDO::FETCH_ASSOC);
+             
 
-            return $result['project_ID'] ; 
+            return  $stm->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             
             return $e->getMessage();

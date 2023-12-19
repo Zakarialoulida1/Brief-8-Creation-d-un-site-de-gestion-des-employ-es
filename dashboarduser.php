@@ -35,7 +35,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
   <body>
 
     <?php
-    include 'dbconnect.php';
+
 
     $row = $user->fetchone($id);
 
@@ -44,7 +44,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
     $prenom = $row['prénom'];
     $roleuser = $row['roleuser'];
     $monequipe = $row['équipe_ID'];
-
+    $nomdelequipe = '';
     // var_dump($monequipe);
     // die();
     $image = $row['image'];
@@ -156,6 +156,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
 
                     <?php
 
+
                     echo "
                         <li class='col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200'>
                         <div class='flex-1 flex flex-col p-8'>
@@ -174,9 +175,11 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
           </li>";
 
 
+          $idprojectrecuperer=0;
+                    if ($myteam->fetch_project_id_from_team($monequipe)!== NULL) {
+                      $idprojectrecuperer = $myteam->fetch_project_id_from_team($monequipe);
+                    }
 
-
-                    $idprojectrecuperer = $myteam->fetch_project_id_from_team($monequipe);
 
 
 
@@ -233,17 +236,17 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
         </main>
       <?php
 
-                      
 
 
 
-                      $collaborator=$user->fetchAllcollab($monequipe);
-                      
+
+                      $collaborator = $user->fetchAllcollab($monequipe);
+
 
                       // $equipeInfoQuery = "SELECT * FROM equipes WHERE équipe_ID = '$monequipe'";
                       // $equipeInfoResult = mysqli_query($sql, $equipeInfoQuery);
                       // $equipeInfo = mysqli_fetch_assoc($equipeInfoResult);
-                      $myteam=$myteam->fetch_myteam($monequipe);
+                      $myteam = $myteam->fetch_myteam($monequipe);
 
                       if ($myteam['Nom_Équipe']) {
                         $nomEquipe = $myteam['Nom_Équipe'];
@@ -261,7 +264,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
                         echo "<tbody class='bg-white divide-y divide-gray-200'>";
 
 
-                        foreach($collaborator as $membre) {
+                        foreach ($collaborator as $membre) {
                           $membreID = $membre['Membre_ID'];
                           $nomMembre = $membre['nom'];
                           $prenomMembre = $membre['prénom'];

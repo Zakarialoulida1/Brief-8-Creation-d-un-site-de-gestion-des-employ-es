@@ -36,19 +36,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
     <body>
 
         <?php
-        // include 'dbconnect.php';
-        // $id = $_SESSION['Membre_ID'];
-        // $affichuser = "SELECT * FROM users WHERE Membre_ID= '$id' ";
-        // $result = mysqli_query($sql, $affichuser);
-
-        // $row = mysqli_fetch_assoc($result);
-
-        // $nom = $row['nom'];
-        // $prenom = $row['prénom'];
-        // $roleuser = $row['roleuser'];
-        // $monequipe = $row['équipe_ID'];
-        // $image = $row['image'];
-        // $project_ID = $row['project_ID'];
+    
         ?>
 
 

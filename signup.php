@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,13 +11,13 @@
 </head>
 
 <body>
-<div class="flex bg-[#9ad0d0] justify-between items-center px-4">
-    <img class="lg:h-[7vh] h-12 inline-block m-2" src="./img/logo (1).png" alt="Workflow">
-    <div>
-        <a href="index.php" class="p-[8px] w-fit h-fit text-center text-black text-xs font-medium bg-white rounded-full">Login</a>
-        <a href="signupform.php" class="p-[8px] w-fit h-fit text-center text-white text-xs font-medium bg-black rounded-full hover:bg-white hover:text-black">SignUp</a>
+    <div class="flex bg-[#9ad0d0] justify-between items-center px-4">
+        <img class="lg:h-[7vh] h-12 inline-block m-2" src="./img/logo (1).png" alt="Workflow">
+        <div>
+            <a href="index.php" class="p-[8px] w-fit h-fit text-center text-black text-xs font-medium bg-white rounded-full">Login</a>
+            <a href="signupform.php" class="p-[8px] w-fit h-fit text-center text-white text-xs font-medium bg-black rounded-full hover:bg-white hover:text-black">SignUp</a>
+        </div>
     </div>
-</div>
 
     <div class=" lg:flex-row lg:justify-evenly lg:items-center flex flex-col items-center mt-4 ">
 
@@ -27,7 +26,7 @@
         <div class="border-2 border-black  flex flex-col items-center p-2">
 
             <h1 class="font-semibold underline" id="heading">Sign Up Form</h1><br>
-            <form class="  flex flex-col items-center" enctype="multipart/form-data" action="sign_process.php"  method="POST">
+            <form class="  flex flex-col items-center" enctype="multipart/form-data" action="sign_process.php" method="POST">
 
 
 
@@ -79,7 +78,7 @@
                     <input class="border-2 border-black rounded w-[250px] p-1" type="password" id="cpass" name="cpass" placeholder="Retype Password" required></br></br>
                 </div>
                 <a href="index.php"><input class=" bg-teal-100 border-2 border-black rounded w-[285px] p-1" type="submit" id="btn" value="SignUp" name="submit" /></a>
-                   </form>
+            </form>
         </div>
 
 </body>

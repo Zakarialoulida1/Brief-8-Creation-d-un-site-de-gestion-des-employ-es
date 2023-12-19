@@ -1,12 +1,13 @@
 <?php
 session_start();
 
-if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
-  $role = $_SESSION['roleuser'];
-  require_once("signupconfig.php");
+ require_once("signupconfig.php");
   require_once("classteam.php");
   require_once("CLASS_PROJECT.PHP");
   require_once("CLASS_SCRUM.PHP");
+if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
+  $role = $_SESSION['roleuser'];
+ 
   $project = new project($pdo);
   $scrummuster = new scrummuster($pdo);
   $scrummuster->loginuser($_SESSION['Membre_ID'], $_SESSION['prénom'], $_SESSION['nom'], $_SESSION['email'], $_SESSION['motdepasse'], $_SESSION['roleuser'], $_SESSION['image'], $_SESSION['téléphone']);
@@ -35,20 +36,19 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
 
     <?php
 
-    include 'dbconnect.php';
+   
     $id = $scrummuster->getid();
 
-    $ligne = $scrummuster->fetchone($id);
+    $row = $scrummuster->fetchone($id);
 
 
-    foreach ($ligne as $row) {
       $nom = $row['nom'];
       $prenom = $row['prénom'];
       $roleuser = $row['roleuser'];
       $monequipe = $row['équipe_ID'];
       $image = $row['image'];
       $project_ID = $row['project_ID'];
-    }
+    
     // $nom = $scrummuster->getusername();
     // $prenom = $scrummuster->getuserlastname();
     // $roleuser =$scrummuster->getrole();
@@ -149,7 +149,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
 
 
         </div><div class="bg-gray-100 py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="teams text-center bg-green-100 p-2 m-4 text-3xl">YOUR TEAMS</h1>
+        <h1 class=" text-center bg-green-100 p-2 m-4 text-3xl">YOUR TEAMS</h1>
 
         
 

@@ -1,6 +1,6 @@
 <?php
 
-
+require_once("signupconfig.php");
 class scrummuster extends user
 {
     public function add_membre_to_team($userID, $selectedEquipeID, $projectID)
