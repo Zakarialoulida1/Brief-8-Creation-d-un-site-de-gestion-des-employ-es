@@ -1,26 +1,17 @@
 <?php
-include 'dbconnect.php';
+require_once("classteam.php");
 
 if (isset($_POST['submit'])) {
     $projectName = $_POST['projectName'];
     $description = $_POST['description'];
     $startDate = $_POST['startDate'];
     $endDate = $_POST['endDate'];
-    // SQL query to insert data into the "Projects" table
-    $project = "INSERT INTO Projects (Nom_project, descrip, Date_de_debut, date_fin) 
-        VALUES ('$projectName', '$description', '$startDate', '$endDate')";
- $stmt = mysqli_prepare($sql, $project);
     
- if ($stmt) {
-     mysqli_stmt_execute($stmt);
-     header("Location: dashboardadmin.php?success=1");
-     exit();
- } else {
-     echo "Error: " . mysqli_error($sql);
- }
+
+$team = new Team($pdo);
 
 
- mysqli_close($sql);
+$result = $team->create_project($projectName, $description, $startDate, $endDate);
 
 }  
 ?>

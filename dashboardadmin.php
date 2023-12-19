@@ -3,9 +3,12 @@ session_start();
 
 if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
 
-    require_once("signupconfig.php");
+    require_once("CLASS_PO.php");
+    require_once("CLASS_PROJECT.PHP");
     $role = $_SESSION['roleuser'];
-    $Productowner = new productowner($_SESSION['Membre_ID'], $_SESSION['prénom'], $_SESSION['nom'], $_SESSION['email'], $_SESSION['motdepasse'], $_SESSION['roleuser'], $_SESSION['image'], $_SESSION['téléphone']);
+    $Project=new project($pdo);
+    $Productowner = new productowner($pdo);
+    $Productowner->loginuser($_SESSION['Membre_ID'], $_SESSION['prénom'], $_SESSION['nom'], $_SESSION['email'], $_SESSION['motdepasse'], $_SESSION['roleuser'], $_SESSION['image'], $_SESSION['téléphone']);
 
     // $user=new user();
     //    var_dump($user);
@@ -143,7 +146,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
                         <?php
 
 
-                        $result = $Productowner->fetchallproject();
+                        $result = $Project->fetchallproject();
                         foreach ($result as $row) {
                             # code...
 
@@ -291,7 +294,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
                                     <select id="countries" name="rol" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                         <option selected>Choose a projects</option>
                                         <?php
-                                        $result = $Productowner->fetchallproject();
+                                        $result = $Project->fetchallproject();
                                         foreach ($result as $row) {
                                             $projectID = $row['project_ID'];
                                             $projectName = $row['Nom_project'];
@@ -322,8 +325,9 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
             </main>
 
         </div>
-        <script src="dynamic.js"></script>
         <script src="script.js"></script>
+        <script src="dynamic.js"></script>
+        
     </body>
 
 

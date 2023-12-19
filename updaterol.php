@@ -1,7 +1,7 @@
 <?php
 include 'dbconnect.php';
-require_once("signupconfig.php");
-$Productowner=new productowner();
+require_once("CLASS_PO.php");
+$Productowner=new productowner($pdo);
 $id = "";
 
 if (isset($_GET["id"])) {

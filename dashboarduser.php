@@ -3,8 +3,16 @@ session_start();
 
 
 if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
+  $id = $_SESSION['Membre_ID'];
+  $role = $_SESSION['roleuser'];
+  require_once("signupconfig.php");
+  require_once("classteam.php");
+  require_once("CLASS_PROJECT.PHP");
+  $user = new user($pdo);
+  $myteam = new team($pdo);
+  $my_project = new project($pdo);
 
-  $role=$_SESSION['roleuser'];
+
 
   if ($role !== 'user') {
     // Redirect to an unauthorized access page or show an error message
@@ -28,33 +36,28 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
 
     <?php
     include 'dbconnect.php';
-    
-    // Fetch the rows from the 'product' table
-    $id = $_SESSION['Membre_ID'];
-    $affichuser = "SELECT * FROM users WHERE Membre_ID= '$id' ";
-    $result = mysqli_query($sql, $affichuser);
 
-   
-    $row = mysqli_fetch_assoc($result);
+    $row = $user->fetchone($id);
+
 
     $nom = $row['nom'];
     $prenom = $row['prénom'];
     $roleuser = $row['roleuser'];
     $monequipe = $row['équipe_ID'];
-      $nomdelequipe=""; 
-         $image = $row['image'];
-    if($monequipe!=NULL){
 
-    $affich_monequipe = "SELECT * FROM equipes WHERE équipe_ID= '$monequipe' ";
-    $result= 0;
-  
-    if(mysqli_query($sql, $affich_monequipe)==NULL){
-      $result2 =  mysqli_query($sql, $affich_monequipe);
-       $ligne = mysqli_fetch_assoc($result2);
-       $nomdelequipe= $ligne['Nom_Équipe'];
-    }}
-   
-   
+    // var_dump($monequipe);
+    // die();
+    $image = $row['image'];
+    if ($monequipe !== NULL) {
+      $ligne = $myteam->fetch_myteam($monequipe);
+      // var_dump($ligne['Nom_Équipe']);
+      // die();
+
+
+      $nomdelequipe = $ligne['Nom_Équipe'];
+    }
+
+
     ?>
 
     <div class="min-h-[640px] bg-gray-100" x-data="{ open: false }" @keydown.window.escape="open = false">
@@ -102,14 +105,14 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
 
             <div class="ml-3 flex flex-col">
 
-            <img class='inline-block h-14 w-14 rounded-full  ' src='img/<?php echo $image?>' alt=''>
+              <img class='inline-block h-14 w-14 rounded-full  ' src='img/<?php echo $image ?>' alt=''>
 
 
               <p class="text-sm font-medium text-black">
-                <?php echo"  $prenom  " ;
-                echo $nom?>
+                <?php echo "  $prenom  ";
+                echo $nom ?>
               </p>
-             
+
             </div>
 
             <a href="logout.php" class="p-4 w-fit h-fit text-center text-black text-xs font-medium bg-red-400 rounded-full">LOG OUT</a>
@@ -129,7 +132,8 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
         </div>
 
 
-
+        <?php
+        ?>
 
 
         <main class="flex-1 ">
@@ -150,7 +154,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
 
 
 
-                  <?php
+                    <?php
 
                     echo "
                         <li class='col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200'>
@@ -169,147 +173,134 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
       
           </li>";
 
-              
-          $idprojectrecuperer=0;
-                            $tirerequipe = "SELECT project_ID  FROM equipes WHERE équipe_ID= '$monequipe' ";
-                           if(  mysqli_query($sql, $tirerequipe)==NULL){
-                            $equipe = mysqli_query($sql, $tirerequipe);
-                            $equipeselect=mysqli_fetch_assoc($equipe);
-                            $idprojectrecuperer=$equipeselect['project_ID'];
 
-}
-        else { echo"YOU DON'T have a project";}
 
-                            $affichprojects="SELECT * from projects where project_ID= '$idprojectrecuperer' ";
-                            $execut = mysqli_query($sql, $affichprojects);
-                            if($row = mysqli_fetch_assoc($execut)){ 
 
-                                $projectID = $row['project_ID'];
-                                $projectName = $row['Nom_project'];
-                                $description = $row['descrip'];
-                                $startDate = $row['Date_de_debut'];
-                                $endDate = $row['date_fin'];
+                    $idprojectrecuperer = $myteam->fetch_project_id_from_team($monequipe);
 
-                        ?>
+
+
+
+                    $my_project = $my_project->fetch_one_project($idprojectrecuperer);
+
+                    foreach ($my_project as $row) {
+
+                      $projectID = $row['project_ID'];
+                      $projectName = $row['Nom_project'];
+                      $description = $row['descrip'];
+                      $startDate = $row['Date_de_debut'];
+                      $endDate = $row['date_fin'];
+
+                    ?>
 
 
 
 
 
-                                <li class=" hidden project col-span-1 flex flex-col text-center bg-white rounded-lg shadow  divide-gray-200">
-                                <h2>Your Project is :</h2>
-                                    <div class="flex-1 flex flex-col justify-between p-8 ">
+                      <li class=" hidden project col-span-1 flex flex-col text-center bg-white rounded-lg shadow  divide-gray-200">
+                        <h2>Your Project is :</h2>
+                        <div class="flex-1 flex flex-col justify-between p-8 ">
 
-                                        <h3 class=" text-gray-900 text-sm font-medium"><?php echo "  $projectName" ?></h3>
-
-
-                                        <div class="  text-gray-500  text-sm">
-                                            <?php
-                                            echo "<p class='mb-3 font-normal text-gray-700'>$description</p>";
-
-                                            ?>
-                                        </div>
+                          <h3 class=" text-gray-900 text-sm font-medium"><?php echo "  $projectName" ?></h3>
 
 
-                                        <div class="  flex justify-between">
-                                            <span class="px-2 py-1 text-g*reen-800 text-xs font-medium bg-green-100 rounded-full"><?php echo "   $startDate" ?></span>
-                                            <span class="px-2 py-1 text-green-800 text-xs font-medium bg-red-400 rounded-full"><?php echo "  $endDate" ?></span>
-                                        </div>
+                          <div class="  text-gray-500  text-sm">
+                            <?php
+                            echo "<p class='mb-3 font-normal text-gray-700'>$description</p>";
+
+                            ?>
+                          </div>
 
 
-                                    </div>
-                                    <div class="-mt-px flex divide-x divide-gray-200">
+                          <div class="  flex justify-between">
+                            <span class="px-2 py-1 text-g*reen-800 text-xs font-medium bg-green-100 rounded-full"><?php echo "   $startDate" ?></span>
+                            <span class="px-2 py-1 text-green-800 text-xs font-medium bg-red-400 rounded-full"><?php echo "  $endDate" ?></span>
+                          </div>
 
 
+                        </div>
+                        <div class="-mt-px flex divide-x divide-gray-200">
 
 
+                      </li>
 
-
-
-
-                                </li>
-                             
-</ul>
+                  </ul>
 
                 </div>
               </div>
 
 
         </main>
-    <?php    
+      <?php
 
-  $equipeID = $monequipe;
-  
-    
-  
- 
-    $membresQuery = "SELECT * FROM users WHERE équipe_ID = '$equipeID'";
-    $membresResult = mysqli_query($sql, $membresQuery);
-  
-  $equipeInfoQuery = "SELECT * FROM equipes WHERE équipe_ID = '$equipeID'";
-  $equipeInfoResult = mysqli_query($sql, $equipeInfoQuery);
-  $equipeInfo = mysqli_fetch_assoc($equipeInfoResult);
+                      
 
-  if ($equipeInfo && mysqli_num_rows($membresResult) > 0) {
-    $nomEquipe = $equipeInfo['Nom_Équipe'];
-    
-    echo "<div class='table hidden p-12 '>";
-    echo "<h2 class='text-2xl font-semibold text-center bg-green-200 text-gray-900 mt-8 mb-4'>$nomEquipe</h2>";
-    echo "<table class='min-w-full divide-y divide-gray-200'>";
-    echo "<thead class='bg-gray-50'>";
-    echo "<tr>";
-    echo "<th class='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Nom</th>";
-    echo "<th class='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Prénom</th>";
-    
-    echo "</tr>";
-    echo "</thead>";
-    echo "<tbody class='bg-white divide-y divide-gray-200'>";
 
-    
-    while ($membre = mysqli_fetch_assoc($membresResult)) {
-      $membreID = $membre['Membre_ID'];
-      $nomMembre = $membre['nom'];
-      $prenomMembre = $membre['prénom'];
-      $image=$membre['image'];
 
-      echo "<tr>";
-      echo "<td class='px-6 py-4 whitespace-nowrap'>$nomMembre</td>";
-      echo "<td class='px-6 py-4 whitespace-nowrap'>$prenomMembre</td>";
-      
-      echo "</tr>";
-    }
+                      $collaborator=$user->fetchAllcollab($monequipe);
+                      
 
-    echo "</tbody>";
-    echo "</table>";
-    echo "</div>";
-  } else {
-    echo "<p>Aucun membre dans cette équipe.</p>";
-  }
-}
-?>
-   <?php
-                            
-                                ?>
+                      // $equipeInfoQuery = "SELECT * FROM equipes WHERE équipe_ID = '$monequipe'";
+                      // $equipeInfoResult = mysqli_query($sql, $equipeInfoQuery);
+                      // $equipeInfo = mysqli_fetch_assoc($equipeInfoResult);
+                      $myteam=$myteam->fetch_myteam($monequipe);
+
+                      if ($myteam['Nom_Équipe']) {
+                        $nomEquipe = $myteam['Nom_Équipe'];
+
+                        echo "<div class='table hidden p-12 '>";
+                        echo "<h2 class='text-2xl font-semibold text-center bg-green-200 text-gray-900 mt-8 mb-4'>$nomEquipe</h2>";
+                        echo "<table class='min-w-full divide-y divide-gray-200'>";
+                        echo "<thead class='bg-gray-50'>";
+                        echo "<tr>";
+                        echo "<th class='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Nom</th>";
+                        echo "<th class='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Prénom</th>";
+
+                        echo "</tr>";
+                        echo "</thead>";
+                        echo "<tbody class='bg-white divide-y divide-gray-200'>";
+
+
+                        foreach($collaborator as $membre) {
+                          $membreID = $membre['Membre_ID'];
+                          $nomMembre = $membre['nom'];
+                          $prenomMembre = $membre['prénom'];
+                          $image = $membre['image'];
+
+                          echo "<tr>";
+                          echo "<td class='px-6 py-4 whitespace-nowrap'>$nomMembre</td>";
+                          echo "<td class='px-6 py-4 whitespace-nowrap'>$prenomMembre</td>";
+
+                          echo "</tr>";
+                        }
+
+                        echo "</tbody>";
+                        echo "</table>";
+                        echo "</div>";
+                      } else {
+                        echo "<p>Aucun membre dans cette équipe.</p>";
+                      }
+                    }
+      ?>
+      <?php
+
+      ?>
       </div>
     </div>
     <script src="script.js"></script>
     <script>
-      const team=document.getElementById('team');
-      const table=document.querySelector('.table')
-      team.addEventListener('click',()=>{
+      const team = document.getElementById('team');
+      const table = document.querySelector('.table')
+      team.addEventListener('click', () => {
         table.classList.toggle('hidden');
 
       })
-      const affichproject=document.getElementById('affichproject');
-      const project =document.querySelector('.project');
-      affichproject.addEventListener('click',()=>{
+      const affichproject = document.getElementById('affichproject');
+      const project = document.querySelector('.project');
+      affichproject.addEventListener('click', () => {
         project.classList.toggle('hidden');
 
       })
-      
-
-
-
     </script>
 
   </body>
@@ -320,7 +311,7 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
 
 
 <?php
-}else {
+} else {
   header("Location: index.php");
   exit();
 }

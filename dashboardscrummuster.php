@@ -2,10 +2,15 @@
 session_start();
 
 if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
-  $role=$_SESSION['roleuser'];
+  $role = $_SESSION['roleuser'];
   require_once("signupconfig.php");
-  $scrummuster=new scrummuster($_SESSION['Membre_ID'], $_SESSION['prénom'], $_SESSION['nom'], $_SESSION['email'], $_SESSION['motdepasse'], $_SESSION['roleuser'], $_SESSION['image'], $_SESSION['téléphone']);
-  
+  require_once("classteam.php");
+  require_once("CLASS_PROJECT.PHP");
+  require_once("CLASS_SCRUM.PHP");
+  $project = new project($pdo);
+  $scrummuster = new scrummuster($pdo);
+  $scrummuster->loginuser($_SESSION['Membre_ID'], $_SESSION['prénom'], $_SESSION['nom'], $_SESSION['email'], $_SESSION['motdepasse'], $_SESSION['roleuser'], $_SESSION['image'], $_SESSION['téléphone']);
+
   if ($role !== 'scrummuster') {
     // Redirect to an unauthorized access page or show an error message
     header("Location: unauthorized.php");
@@ -29,22 +34,21 @@ if (isset($_SESSION['Membre_ID']) && isset($_SESSION['nom'])) {
 
 
     <?php
-    
-include 'dbconnect.php';
-    $id = $_SESSION['Membre_ID'];
-    $affichuser = "SELECT * FROM users WHERE Membre_ID= '$id' ";
-    $result = mysqli_query($sql, $affichuser);
 
-    $row = mysqli_fetch_assoc($result);
-    
+    include 'dbconnect.php';
+    $id = $scrummuster->getid();
 
-    $nom = $row['nom'];
-    $prenom = $row['prénom'];
-    $roleuser = $row['roleuser'];
-    $monequipe = $row['équipe_ID'];
-    $image = $row['image'];
-    $project_ID = $row['project_ID'];
-    
+    $ligne = $scrummuster->fetchone($id);
+
+
+    foreach ($ligne as $row) {
+      $nom = $row['nom'];
+      $prenom = $row['prénom'];
+      $roleuser = $row['roleuser'];
+      $monequipe = $row['équipe_ID'];
+      $image = $row['image'];
+      $project_ID = $row['project_ID'];
+    }
     // $nom = $scrummuster->getusername();
     // $prenom = $scrummuster->getuserlastname();
     // $roleuser =$scrummuster->getrole();
@@ -59,7 +63,7 @@ include 'dbconnect.php';
 
 
     <div id="sidebar" class="min-h-[640px] bg-gray-100 hidden fixed w-full lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0  z-50 ">
-      
+
       <div class="flex-1 flex flex-col min-h-0 bg-[#9ad0d3]">
         <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
           <div class="flex  justify-between items-center  px-4">
@@ -95,22 +99,22 @@ include 'dbconnect.php';
         <div class="w-full flex justify-between items-center border-t border-black p-4">
 
 
-                    <div class="ml-3 flex flex-col">
+          <div class="ml-3 flex flex-col">
 
-                        <img class='inline-block h-14 w-14 rounded-full  ' src='img/<?php echo $scrummuster->getimg() ?>' alt=''>
-
-
-                        <p class="text-sm font-medium text-black">
-                            <?php echo   $scrummuster->getusername();
-                            echo $scrummuster->getuserlastname() ?>
-                        </p>
-
-                    </div>
-
-                    <a href="logout.php" class="p-4 w-fit h-fit text-center text-black text-xs font-medium bg-red-400 rounded-full">LOG OUT</a>
+            <img class='inline-block h-14 w-14 rounded-full  ' src='img/<?php echo $scrummuster->getimg() ?>' alt=''>
 
 
-                </div>
+            <p class="text-sm font-medium text-black">
+              <?php echo   $scrummuster->getusername();
+              echo $scrummuster->getuserlastname() ?>
+            </p>
+
+          </div>
+
+          <a href="logout.php" class="p-4 w-fit h-fit text-center text-black text-xs font-medium bg-red-400 rounded-full">LOG OUT</a>
+
+
+        </div>
 
       </div>
     </div>
@@ -144,86 +148,78 @@ include 'dbconnect.php';
 
 
 
-        </div>
+        </div><div class="bg-gray-100 py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="teams text-center bg-green-100 p-2 m-4 text-3xl">YOUR TEAMS</h1>
 
+        
 
-        <div class="bg-gray-100 py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          <ul role="list" class="teams grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3  2lg:grid-cols-4">
+          <ul role="list" class=" grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3  2lg:grid-cols-4">
             <?php
-           
-           
-           $result=$scrummuster->fetch_my_teams();
-          
-            foreach ( $result as $equipe)  {
-                $equipeID = $equipe['équipe_ID'];
-                $nomEquipe = $equipe['Nom_Équipe'];
-                $Date_de_Création = $equipe['Date_de_Création']
+            
+
+            $team = new team($pdo);
+
+            $result = $team->fetch_my_teams($id);
+
+            foreach ($result as $equipe) {
+              $equipeID = $equipe['équipe_ID'];
+              $nomEquipe = $equipe['Nom_Équipe'];
+              $Date_de_Création = $equipe['Date_de_Création']
 
 
 
 
             ?>
-                <li class=" col-span-1 flex flex-col text-center bg-white rounded-lg shadow  divide-gray-200">
-                  <div class="flex-1 flex flex-col justify-between p-8 ">
-                    <h3 class=" text-gray-900 text-sm font-medium"><?php echo "  $nomEquipe " ?></h3>
-                    <div class="  flex justify-between">
-                      <label>date ce creation</label>
-                      <span class="px-2 py-1 text-g*reen-800 text-xs font-medium bg-green-100 rounded-full"><?php echo "  $Date_de_Création" ?></span>
-                    </div>
+              <li class=" col-span-1 flex flex-col text-center bg-white rounded-lg shadow  divide-gray-200">
+                <div class="flex-1 flex flex-col justify-between p-8 ">
+                  <h3 class=" text-gray-900 text-sm font-medium"><?php echo "  $nomEquipe " ?></h3>
+                  <div class="  flex justify-between">
+                    <label>date ce creation</label>
+                    <span class="px-2 py-1 text-g*reen-800 text-xs font-medium bg-green-100 rounded-full"><?php echo "  $Date_de_Création" ?></span>
                   </div>
-                  <div class="-mt-px flex divide-x divide-gray-200">
-                    <form class="-ml-px w-0 flex-1 flex" method="post">
-                      <input type="hidden" name="equipeID" value="<?php echo "$equipeID"; ?>">
-                      <button type="submit" class="relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:text-gray-500 ml-3">Voir ces membres</button>
-                    </form>
-                    <form class="-ml-px w-0 flex-1 flex" method="post">
-                      <input type="hidden" name="deleteId" value="<?php echo $equipeID; ?>">
-                      <button type="submit" id="delete it" class="relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:text-gray-500 ml-3">Delete it</button>
+                </div>
+                <div class="-mt-px flex divide-x divide-gray-200">
+                  <form class="-ml-px w-0 flex-1 flex" method="post">
+                    <input type="hidden" name="equipeID" value="<?php echo "$equipeID"; ?>">
+                    <button type="submit" class="relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:text-gray-500 ml-3">Voir ces membres</button>
+                  </form>
+                  <form class="-ml-px w-0 flex-1 flex" method="post">
+                    <input type="hidden" name="deleteId" value="<?php echo $equipeID; ?>">
+                    <button type="submit" id="delete it" class="relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:text-gray-500 ml-3">Delete it</button>
 
 
-                    </form>
-                  </div>
+                  </form>
+                </div>
 
 
-      
 
 
-                </li>
+
+              </li>
 
             <?php }
-             ?>
+            ?>
           </ul>
           <?php
           if (isset($_POST['deleteId'])) {
             $deleteequipe = $_POST["deleteId"];
+            $scrummuster->set_NULL_toteam_toproject($deleteequipe);
             $scrummuster->delete_team($deleteequipe);
           }
           ?>
 
           <?php
 
+          // $membres = '';
+          // $equipeInfo = '';
+          if (isset($_POST['equipeID'])) {
+            $equipeID = $_POST['equipeID'];
 
+            $equipeData = $scrummuster->getTeamInfoAndMembers($equipeID);
+            $membres = $equipeData['membres'];
+            $equipeInfo = $equipeData['equipeInfo'];
 
-if (isset($_POST['equipeID'])) {
-  $equipeID = $_POST['equipeID'];
-  
-  $team = new Team();
-  $equipeData = $team->getTeamInfoAndMembers($equipeID);
-
-  if (isset($equipeData['error'])) {
-      echo $equipeData['error'];
-  } else {
-      // Access team members and information
-      $membres = $equipeData['membres'];
-      $equipeInfo = $equipeData['equipeInfo'];
-
-      // Now you can use $membres and $equipeInfo as needed
-      // ...
-  }
-}
-          
-            if ($equipeInfo && mysqli_num_rows($membresResult) > 0) {
+            if ($equipeInfo &&   $membres) {
               $nomEquipe = $equipeInfo['Nom_Équipe'];
 
               echo "<h2 class='text-2xl font-semibold text-gray-900 mt-8 mb-4'>$nomEquipe</h2>";
@@ -237,7 +233,8 @@ if (isset($_POST['equipeID'])) {
               echo "</thead>";
               echo "<tbody class='bg-white divide-y divide-gray-200'>";
 
-              while ($membre = mysqli_fetch_assoc($membresResult)) {
+
+              foreach ($membres as $membre) {
                 $membreID = $membre['Membre_ID'];
                 $nomMembre = $membre['nom'];
                 $prenomMembre = $membre['prénom'];
@@ -255,15 +252,17 @@ if (isset($_POST['equipeID'])) {
               echo "<p>Aucun membre dans cette équipe.</p>";
             }
           }
+
           ?>
-
-          <ul class="myproject">
-            <hr class=" h-1 my-8 bg-gray-200 border-0 rounded dark:bg-gray-700">
+          
+<hr class=" h-1 my-8 bg-gray-200 border-0 rounded dark:bg-gray-700">
+<h1 class="text-center bg-green-100 p-2 m-4 text-3xl">YOUR PROJECT</h1>
+          <ul class="myproject grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3  2lg:grid-cols-4">
+            
             <?php
+            $my_project = $project->fetch_one_project($project_ID);
 
-            $affichprojects = "SELECT * from projects where project_ID= '$project_ID'";
-            $result = mysqli_query($sql, $affichprojects);
-            while ($row = mysqli_fetch_assoc($result)) {
+            foreach ($my_project as $row) {
 
               $projectID = $row['project_ID'];
               $projectName = $row['Nom_project'];
@@ -317,83 +316,68 @@ if (isset($_POST['equipeID'])) {
 
 
             <?php
-              if ($_SESSION['roleuser'] === 'scrummuster') {
-           
-                $affichuser = "SELECT * FROM users WHERE roleuser = 'user' and équipe_ID IS NULL ";
-                $result = mysqli_query($sql, $affichuser);
-
-
-         
-                while ($row = mysqli_fetch_assoc($result)) {
-                
 
 
 
+              $fetch_users_where_no_team = $scrummuster->fetch_users_where_no_team();
 
-                  $nom = $row['nom'];
-                  $prenom = $row['prénom'];
-                  $roleuser = $row['roleuser'];
-                  $memberid = $row['Membre_ID'];
 
-                  $image = $row['image'];
+
+              foreach ($fetch_users_where_no_team as $row) {
+                $nom = $row['nom'];
+                $prenom = $row['prénom'];
+                $roleuser = $row['roleuser'];
+                $memberid = $row['Membre_ID'];
+                $image = $row['image'];
 
             ?>
 
-                <li class=" col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200">
-                  <div class="flex-1 flex flex-col p-8">
-                    <img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="img/<?php echo "$image" ?>" alt="">
-                    <h3 class="mt-6 text-gray-900 text-sm font-medium"><?php echo "$nom ";
-                                                                        echo "$prenom" ?></h3>
-                    <dl class="mt-1 flex-grow flex flex-col justify-between">
+              <li class=" col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200">
+                <div class="flex-1 flex flex-col p-8">
+                  <img class="w-32 h-32 flex-shrink-0 mx-auto rounded-full" src="img/<?php echo "$image" ?>" alt="">
+                  <h3 class="mt-6 text-gray-900 text-sm font-medium"><?php echo "$nom ";
+                                                                      echo "$prenom" ?></h3>
+                  <dl class="mt-1 flex-grow flex flex-col justify-between">
 
 
-                      <dd class="mt-3">
-                        <span class="px-2 py-1 text-green-800 text-xs font-medium bg-green-100 rounded-full"><?php echo "$roleuser" ?></span>
-                      </dd>
-                    </dl>
+                    <dd class="mt-3">
+                      <span class="px-2 py-1 text-green-800 text-xs font-medium bg-green-100 rounded-full"><?php echo "$roleuser" ?></span>
+                    </dd>
+                  </dl>
+                </div>
+
+                <div class="-mt-px flex divide-x divide-gray-200">
+
+
+
+                  <div class="-mt-px flex divide-x divide-gray-200 -mt-px flex divide-x divide-gray-200 relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium  border-transparent rounded-bl-lg hover:text-gray-500 -ml-px w-0 flex-1 flex" <?php if ($roleuser != 'user') { ?>style="display:none" <?php } ?>>
+                    <form action="" method="post">
+
+
+                      <button data-id="<?php echo $memberid; ?>" class="Ajouteruser_a_equipe ml-3">Ajoutez a Une Equipe</button>
+
+                    </form>
                   </div>
 
-                  <div class="-mt-px flex divide-x divide-gray-200">
+                </div>
 
-
-
-                    <div class="-mt-px flex divide-x divide-gray-200 -mt-px flex divide-x divide-gray-200 relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium  border-transparent rounded-bl-lg hover:text-gray-500 -ml-px w-0 flex-1 flex" <?php if ($roleuser != 'user') { ?>style="display:none" <?php } ?>>
-                      <form action="" method="post">
-
-
-                        <button data-id="<?php echo $memberid; ?>" class="Ajouteruser_a_equipe ml-3">Ajoutez a Une Equipe</button>
-
-                      </form>
-                    </div>
-
-                  </div>
-
-                </li>
+              </li>
             <?php }
-              } ?>
+            ?>
 
             <?php
 
               if (isset($_POST['submitteam'])) {
-                echo"dfcgvhbj";
-                
                 $teamName = $_POST["teamName"];
-
                 $projectID = $_SESSION['project_ID'];
-                echo "$projectID";
-
-                $insertQuery = "INSERT INTO equipes (Date_de_Création, Nom_Équipe, project_ID,scrummuster_id)
-                VALUES (CURRENT_DATE(), '$teamName', '$projectID',$id )";
-
-                $result = mysqli_query($sql, $insertQuery);
+                $result = $team->create_team($teamName, $projectID, $id);
                 if ($result) {
                   echo "Team added successfully.";
                 } else {
                   echo "Error adding team: " . mysqli_error($sql);
                 }
               }
-              $equipesQuery = "SELECT * FROM equipes";
-              $equipesResult = mysqli_query($sql, $equipesQuery);
+
             ?>
 
 
@@ -402,8 +386,8 @@ if (isset($_POST['equipeID'])) {
 
 
 
-          <div id="popup" class="popup hidden fixed inset-0 bg-gray-500 bg-opacity-75 overflow-y-auto">
-            <div id="popup" class="flex items-center justify-center min-h-screen">
+          <div  class="form_add_team hidden fixed inset-0 bg-gray-500 bg-opacity-75 overflow-y-auto">
+            <div  class="flex items-center justify-center min-h-screen">
               <div class="bg-white p-8 rounded shadow-md">
                 <h2 class="text-lg font-semibold mb-4">CREER VOTRE EQUPIE</h2>
 
@@ -427,32 +411,18 @@ if (isset($_POST['equipeID'])) {
           <?php
 
               if (isset($_POST['submittoequipe'])) {
-
                 $selectedequipeID = $_POST['equipe'];
-              
-                echo "$selectedequipeID";
-
                 $userID = $_POST['memberid'];
-                echo "$userID";
-
-
-                $updateQuery = "UPDATE `users` SET `équipe_ID` = '$selectedequipeID', `project_ID` = '$project_ID' WHERE `Membre_ID` = '$userID'";
-
-
-
-                $result = mysqli_query($sql, $updateQuery);
-
-
+                // var_dump($projectID  );
+                // die();
+                $result = $scrummuster->add_membre_to_team($userID, $selectedequipeID, $projectID);
                 if ($result) {
                   echo "user added to team  successfully.";
                 } else {
-                  echo "Error updating project assignment: " . mysqli_error($sql);
+                  echo "Error updating project assignment:" . mysqli_error($sql);
                 }
               }
           ?>
-
-
-        
           <div class="ajouter_a_lequipe hidden fixed inset-0 bg-gray-500 bg-opacity-75 overflow-y-auto">
             <div id="popup" class="flex items-center justify-center min-h-screen">
               <div class="bg-white p-8 rounded shadow-md">
@@ -462,10 +432,12 @@ if (isset($_POST['equipeID'])) {
                   <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select an option</label>
                   <select name="equipe" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                     <option selected>Choose a TEAM</option>
+
                     <?php
-                    $affichprojects = "SELECT * from Equipes where scrummuster_id=$id";
-                    $result = mysqli_query($sql, $affichprojects);
-                    while ($row = mysqli_fetch_assoc($result)) {
+                    $result = $team->fetch_my_teams($id);
+
+                    foreach ($result as $row) {
+
 
                       $équipe_ID = $row['équipe_ID'];
                       $Nom_Équipe = $row['Nom_Équipe'];
@@ -517,24 +489,40 @@ if (isset($_POST['equipeID'])) {
         teams.classList.remove("hidden");
         myproject.classList.add("hidden")
         users.classList.add("hidden");
-      })
+      });
       btnproject.addEventListener("click", (event) => {
         event.preventDefault();
         teams.classList.add("hidden");
         myproject.classList.remove("hidden");
         users.classList.add("hidden");
-      })
+      });
       all.addEventListener("click", (event) => {
         event.preventDefault();
         teams.classList.remove("hidden");
         myproject.classList.remove("hidden")
         users.classList.remove("hidden");
-      })
+      });
+      
 
 
 
 
 
+      const burgermenu = document.querySelector(".burgermenu");
+const sidebar = document.getElementById("sidebar");
+const fermernav = document.getElementById("fermernav");
+
+
+
+burgermenu.addEventListener("click", () => {
+
+  sidebar.classList.toggle("hidden");
+});
+
+fermernav.addEventListener("click", () => {
+
+  sidebar.classList.add("hidden");
+});
 
 
 
@@ -544,23 +532,19 @@ if (isset($_POST['equipeID'])) {
 
 
       const createequipe = document.querySelector('.createequipe');
-      const popup = document.querySelector('.popup');
+      const form_add_team = document.querySelector('.form_add_team');
 
 
 
       createequipe.addEventListener("click", (event) => {
         event.preventDefault();
-        popup.classList.toggle("hidden");
+        form_add_team.classList.toggle("hidden");
 
       });
     </script>
-
-    <script src="script.js"></script>
-
-
-
+    <!-- <script src="script.js"></script> -->
+    <!-- <script src="dynamic.js"></script> -->
   </body>
-
 
   </html>
 <?php
